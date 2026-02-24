@@ -1,27 +1,88 @@
-# Python
+# ===== PYTHON =====
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
+*.pyc
+*.pyo
+*.pyd
+
+# ===== VIRTUAL ENVIRONMENTS =====
+venv/
+env/
+ENV/
+.venv/
+.env
+venv.bak/
+env.bak/
+
+# ===== BUILD & DISTRIBUTION =====
+build/
+dist/
+*.spec.bak
+*.spec
+
+# ===== PROJECT OUTPUT FILES =====
+# Image outputs
+output_grayscale.jpg
+output_*.jpg
+output_*.png
+grayscale_*.jpg
+grayscale_*.png
+
+# Data outputs
+grayscale_matrix.csv
+grayscale_*.csv
+*.npy
+
+# General image/data files (but keep examples/)
+*.jpg
+*.png
+*.jpeg
+
+# ===== IDE & EDITOR =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ===== OS FILES =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.AppleDB
+
+# ===== TESTING =====
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# ===== MISC =====
+*.log
+*.pot
+*.mo
+.env.local
+.env.*.local
+
 
 # Virtual Environment
 venv/

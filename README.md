@@ -2,6 +2,13 @@
 
 A beginner-friendly Python tool that crops images to 256×256 pixels and converts them to grayscale, then exports the data as a matrix (CSV and binary formats).
 
+**🌐 Try it now:** [Live Web App](https://yourusername.github.io/imageprocessor/)
+
+**Also available as:**
+- ✅ Portable executables for Windows & macOS (no dependencies)
+- ✅ Python script for development
+- ✅ Streamlit web interface
+
 ---
 
 ## 🎯 What Does This Project Do?
@@ -16,7 +23,74 @@ This tool takes an image file and:
 
 ---
 
-## ✅ Prerequisites
+## ⚡ Quick Start
+
+### 🌐 Web App (Online - No Installation!)
+
+**Live:** https://yourusername.github.io/imageprocessor/
+
+Simply:
+1. 📤 Drag & drop an image
+2. 🖼️ See instant preview
+3. 📥 Download results (JPG + CSV)
+4. ✅ All processing happens in your browser!
+
+See [GITHUB_PAGES.md](GITHUB_PAGES.md) for deployment instructions.
+
+---
+
+### 💻 Portable Executables (Offline)
+
+**macOS Web UI:**
+```bash
+./dist/imageprocessor-ui-macos/imageprocessor-ui
+```
+
+**macOS CLI:**
+```bash
+./dist/imageprocessor-macos/imageprocessor image.jpg
+```
+
+**Windows Web UI:**
+```cmd
+dist\imageprocessor-ui-windows\imageprocessor-ui.exe
+```
+
+**Windows CLI:**
+```cmd
+dist\imageprocessor-windows\imageprocessor.exe image.jpg
+```
+
+---
+
+### 💻 Command Line (CLI)
+
+**macOS:**
+```bash
+./dist/imageprocessor-macos/imageprocessor image.jpg
+./dist/imageprocessor-macos/imageprocessor image.jpg -o output.jpg -c matrix.csv
+```
+
+**Windows:**
+```cmd
+dist\imageprocessor-windows\imageprocessor.exe image.jpg
+dist\imageprocessor-windows\imageprocessor.exe image.jpg -o output.jpg -c matrix.csv
+```
+
+---
+
+## 📦 Distribution
+
+Both CLI and Web UI are available as portable executables:
+
+- ✅ **macOS** - Pre-built in `dist/imageprocessor-macos/` and `dist/imageprocessor-ui-macos/`
+- ✅ **Windows** - Build with `build_windows.bat` or `build_ui_windows.bat`
+
+For full details on distribution and building, see **[PORTABLE_APPS.md](PORTABLE_APPS.md)**
+
+---
+
+## ✅ Prerequisites (Development)
 
 Before you start, make sure you have:
 - **Python 3.8 or higher** ([Download Python](https://www.python.org/downloads/))
@@ -29,7 +103,7 @@ python3 --version
 
 ---
 
-## 🚀 Setup (First Time Only)
+## 🚀 Development Setup (First Time Only)
 
 ### Step 1: Navigate to the Project
 
@@ -69,9 +143,17 @@ pip install -r requirements.txt
 
 ---
 
-## 💻 How to Use
+## 💻 How to Use (Development)
 
-### Basic Usage
+### Run Web UI Locally
+
+```bash
+./run_ui.sh      # macOS/Linux
+# or
+run_ui.bat       # Windows
+```
+
+### Run CLI Script
 
 Process an image with default settings:
 
