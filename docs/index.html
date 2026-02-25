@@ -302,6 +302,86 @@
             display: block;
         }
 
+        .crop-settings {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .crop-settings.active {
+            display: block;
+        }
+
+        .crop-settings h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .crop-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .crop-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .crop-toggle label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+            margin: 0;
+        }
+
+        .crop-controls {
+            display: none;
+            gap: 20px;
+        }
+
+        .crop-controls.active {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .crop-control-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .crop-control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .crop-control-group input[type="range"],
+        .crop-control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .crop-control-group input[type="range"] {
+            padding: 5px;
+            height: 6px;
+        }
+
+        .crop-size-value {
+            color: #667eea;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
         footer {
             text-align: center;
             color: white;
@@ -356,6 +436,35 @@
                 <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png">
             </div>
 
+            <!-- Crop Settings -->
+            <div class="crop-settings" id="cropSettings">
+                <h3>⚙️ Processing Settings</h3>
+                <div class="crop-toggle">
+                    <input type="checkbox" id="applyCrop" checked>
+                    <label for="applyCrop">Apply Cropping</label>
+                </div>
+                <div class="crop-controls" id="cropControls">
+                    <div class="crop-control-group">
+                        <label for="cropSize">Crop Size (pixels): <span class="crop-size-value" id="cropSizeValue">256</span></label>
+                        <input type="range" id="cropSize" min="64" max="1024" value="256" step="32">
+                    </div>
+                    <div class="crop-control-group">
+                        <label for="cropRegion">Crop Region:</label>
+                        <select id="cropRegion">
+                            <option value="center">Center</option>
+                            <option value="top-center">Top Center</option>
+                            <option value="top-left">Top Left</option>
+                            <option value="top-right">Top Right</option>
+                            <option value="bottom-center">Bottom Center</option>
+                            <option value="bottom-left">Bottom Left</option>
+                            <option value="bottom-right">Bottom Right</option>
+                            <option value="center-left">Center Left</option>
+                            <option value="center-right">Center Right</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <!-- Loading Indicator -->
             <div class="loading" id="loadingIndicator">
                 <div class="spinner"></div>
@@ -372,13 +481,13 @@
 
                 <!-- Grayscale Image -->
                 <div class="preview-container">
-                    <h3>⬜ Grayscale (256×256)</h3>
+                    <h3 id="grayscaleTitle">⬜ Grayscale (256×256)</h3>
                     <canvas id="grayscaleCanvas"></canvas>
                     <div class="matrix-info">
                         <h4>📊 Matrix Info</h4>
                         <div class="info-item">
                             <span class="info-label">Shape:</span>
-                            <span class="info-value">256 × 256</span>
+                            <span class="info-value" id="matrixShape">256 × 256</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Data Type:</span>
@@ -430,9 +539,16 @@
                 this.loadingIndicator = document.getElementById('loadingIndicator');
                 this.errorMessage = document.getElementById('errorMessage');
                 this.successMessage = document.getElementById('successMessage');
+                this.cropSettings = document.getElementById('cropSettings');
+                this.applyCropCheckbox = document.getElementById('applyCrop');
+                this.cropControls = document.getElementById('cropControls');
+                this.cropSizeInput = document.getElementById('cropSize');
+                this.cropSizeValue = document.getElementById('cropSizeValue');
+                this.cropRegionSelect = document.getElementById('cropRegion');
                 
                 this.originalImage = null;
                 this.grayscaleMatrix = null;
+                this.matrixSize = 256;
                 
                 this.setupEventListeners();
             }
@@ -458,6 +574,27 @@
                     e.preventDefault();
                     this.uploadArea.classList.remove('dragover');
                     this.handleFileSelect(e.dataTransfer.files[0]);
+                });
+                
+                // Crop settings
+                this.applyCropCheckbox.addEventListener('change', () => {
+                    this.cropControls.classList.toggle('active', this.applyCropCheckbox.checked);
+                    if (this.originalImage) {
+                        this.processImage(this.originalImage);
+                    }
+                });
+                
+                this.cropSizeInput.addEventListener('input', () => {
+                    this.cropSizeValue.textContent = this.cropSizeInput.value;
+                    if (this.originalImage) {
+                        this.processImage(this.originalImage);
+                    }
+                });
+                
+                this.cropRegionSelect.addEventListener('change', () => {
+                    if (this.originalImage) {
+                        this.processImage(this.originalImage);
+                    }
                 });
                 
                 // Download buttons
@@ -497,6 +634,9 @@
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
+                        this.originalImage = img;
+                        this.cropSettings.classList.add('active');
+                        this.cropControls.classList.toggle('active', this.applyCropCheckbox.checked);
                         this.processImage(img);
                     };
                     img.onerror = () => {
@@ -507,14 +647,62 @@
                 reader.readAsDataURL(file);
             }
 
+            getCropCoordinates(imgWidth, imgHeight, cropSize, cropRegion) {
+                let startX, startY;
+                
+                // Ensure crop size doesn't exceed image dimensions
+                cropSize = Math.min(cropSize, imgWidth, imgHeight);
+                
+                switch(cropRegion) {
+                    case 'center':
+                        startX = (imgWidth - cropSize) / 2;
+                        startY = (imgHeight - cropSize) / 2;
+                        break;
+                    case 'top-center':
+                        startX = (imgWidth - cropSize) / 2;
+                        startY = 0;
+                        break;
+                    case 'top-left':
+                        startX = 0;
+                        startY = 0;
+                        break;
+                    case 'top-right':
+                        startX = imgWidth - cropSize;
+                        startY = 0;
+                        break;
+                    case 'bottom-center':
+                        startX = (imgWidth - cropSize) / 2;
+                        startY = imgHeight - cropSize;
+                        break;
+                    case 'bottom-left':
+                        startX = 0;
+                        startY = imgHeight - cropSize;
+                        break;
+                    case 'bottom-right':
+                        startX = imgWidth - cropSize;
+                        startY = imgHeight - cropSize;
+                        break;
+                    case 'center-left':
+                        startX = 0;
+                        startY = (imgHeight - cropSize) / 2;
+                        break;
+                    case 'center-right':
+                        startX = imgWidth - cropSize;
+                        startY = (imgHeight - cropSize) / 2;
+                        break;
+                    default:
+                        startX = (imgWidth - cropSize) / 2;
+                        startY = (imgHeight - cropSize) / 2;
+                }
+                
+                return { startX, startY, cropSize };
+            }
+
             processImage(img) {
                 this.loadingIndicator.classList.add('active');
 
                 setTimeout(() => {
                     try {
-                        // Store original image
-                        this.originalImage = img;
-
                         // Display original image
                         const originalCanvas = document.getElementById('originalCanvas');
                         originalCanvas.width = img.width;
@@ -522,25 +710,36 @@
                         const ctx = originalCanvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
 
-                        // Crop to 256x256 from top-center
-                        const cropCanvas = document.createElement('canvas');
-                        cropCanvas.width = 256;
-                        cropCanvas.height = 256;
-                        const cropCtx = cropCanvas.getContext('2d');
+                        // Get crop settings
+                        const applyCrop = this.applyCropCheckbox.checked;
+                        const cropSize = parseInt(this.cropSizeInput.value);
+                        const cropRegion = this.cropRegionSelect.value;
 
-                        // Calculate crop position (top-center)
-                        const startX = (img.width - 256) / 2;
-                        const startY = 0;
+                        let processCanvas = document.createElement('canvas');
+                        let processCtx = processCanvas.getContext('2d');
 
-                        cropCtx.drawImage(img, startX, startY, 256, 256, 0, 0, 256, 256);
+                        if (applyCrop) {
+                            // Crop the image
+                            const { startX, startY, cropSize: actualSize } = this.getCropCoordinates(img.width, img.height, cropSize, cropRegion);
+                            processCanvas.width = actualSize;
+                            processCanvas.height = actualSize;
+                            processCtx.drawImage(img, startX, startY, actualSize, actualSize, 0, 0, actualSize, actualSize);
+                            this.matrixSize = actualSize;
+                        } else {
+                            // Process as-is
+                            processCanvas.width = img.width;
+                            processCanvas.height = img.height;
+                            processCtx.drawImage(img, 0, 0);
+                            this.matrixSize = Math.max(img.width, img.height);
+                        }
 
                         // Convert to grayscale and get matrix
-                        const imageData = cropCtx.getImageData(0, 0, 256, 256);
+                        const imageData = processCtx.getImageData(0, 0, processCanvas.width, processCanvas.height);
                         const data = imageData.data;
-                        this.grayscaleMatrix = new Array(256);
+                        this.grayscaleMatrix = new Array(processCanvas.height);
 
-                        for (let i = 0; i < 256; i++) {
-                            this.grayscaleMatrix[i] = new Array(256);
+                        for (let i = 0; i < processCanvas.height; i++) {
+                            this.grayscaleMatrix[i] = new Array(processCanvas.width);
                         }
 
                         // Convert to grayscale using luminosity formula
@@ -560,19 +759,21 @@
 
                             // Store in matrix
                             const pixelIndex = i / 4;
-                            const row = Math.floor(pixelIndex / 256);
-                            const col = pixelIndex % 256;
+                            const row = Math.floor(pixelIndex / processCanvas.width);
+                            const col = pixelIndex % processCanvas.width;
                             this.grayscaleMatrix[row][col] = gray;
                         }
 
                         // Draw grayscale image
                         const grayscaleCanvas = document.getElementById('grayscaleCanvas');
-                        grayscaleCanvas.width = 256;
-                        grayscaleCanvas.height = 256;
+                        grayscaleCanvas.width = processCanvas.width;
+                        grayscaleCanvas.height = processCanvas.height;
                         const grayscaleCtx = grayscaleCanvas.getContext('2d');
                         grayscaleCtx.putImageData(imageData, 0, 0);
 
                         // Update matrix info
+                        document.getElementById('matrixShape').textContent = `${processCanvas.height} × ${processCanvas.width}`;
+                        document.getElementById('grayscaleTitle').textContent = `⬜ Grayscale (${processCanvas.width}×${processCanvas.height})`;
                         document.getElementById('minValue').textContent = minVal;
                         document.getElementById('maxValue').textContent = maxVal;
 
@@ -593,7 +794,7 @@
             }
 
             displayMatrixSample() {
-                const sampleSize = 10;
+                const sampleSize = Math.min(10, this.grayscaleMatrix.length, this.grayscaleMatrix[0].length);
                 let html = '<table>';
                 
                 for (let i = 0; i < sampleSize; i++) {
