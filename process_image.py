@@ -8,7 +8,7 @@ from src.image_processor import process_image
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Process image: crop to top-center 256x256 and convert to grayscale'
+        description='Process image: crop and convert to grayscale'
     )
     parser.add_argument(
         'image_path',
@@ -24,6 +24,22 @@ def main():
         default='grayscale_matrix.csv',
         help='Path to save grayscale matrix as CSV (default: grayscale_matrix.csv)'
     )
+    parser.add_argument(
+        '-s', '--size',
+        type=int,
+        default=256,
+        help='Crop size in pixels (default: 256)'
+    )
+    parser.add_argument(
+        '-r', '--region',
+        default='center',
+        choices=[
+            'center', 'top-center', 'top-left', 'top-right',
+            'bottom-center', 'bottom-left', 'bottom-right',
+            'center-left', 'center-right'
+        ],
+        help='Crop region (default: center)'
+    )
     
     args = parser.parse_args()
     
@@ -31,15 +47,23 @@ def main():
     image_path = args.image_path
     output_path = args.output
     csv_path = args.csv
+    crop_size = args.size
+    crop_region = args.region
 
     try:
-        grayscale_img, matrix = process_image(image_path, output_path)
+        grayscale_img, matrix = process_image(
+            image_path, 
+            output_path,
+            crop_size=crop_size,
+            crop_region=crop_region
+        )
         
         print("=" * 60)
         print("IMAGE PROCESSING COMPLETE")
         print("=" * 60)
         print(f"\nImage successfully processed:")
-        print(f"  - Cropped to: 256x256 pixels")
+        print(f"  - Crop size: {crop_size}x{crop_size} pixels")
+        print(f"  - Crop region: {crop_region}")
         print(f"  - Converted to: Grayscale")
         print(f"  - Output saved to: {output_path}")
         

@@ -8,16 +8,21 @@ import numpy as np
 from src.image_processor import process_image
 
 
-def process_uploaded_file(uploaded_file):
-    """Process the uploaded image file."""
+def process_uploaded_file(uploaded_file, crop_size=256, crop_region="center"):
+    """Process the uploaded image file with specified crop settings."""
     # Save temporary file
     temp_path = "/tmp/temp_image.jpg"
     with open(temp_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
     
-    # Process image
+    # Process image with crop parameters
     output_path = "/tmp/output_grayscale.jpg"
-    grayscale_img, matrix = process_image(temp_path, output_path)
+    grayscale_img, matrix = process_image(
+        temp_path, 
+        output_path, 
+        crop_size=crop_size, 
+        crop_region=crop_region
+    )
     
     return grayscale_img, matrix
 
@@ -48,20 +53,49 @@ def main():
     st.markdown("""
     **Convert images to grayscale & extract data**
     
-    Upload a JPEG image to:
-    - Crop to 256×256 pixels from the top-center
+    Upload an image to:
+    - Crop to your desired size and region
     - Convert to grayscale
     - Download the processed image and data matrix
     """)
     
-    # Sidebar
+    # Sidebar - Cropping settings
     with st.sidebar:
+        st.header("⚙️ Crop Settings")
+        
+        crop_size = st.slider(
+            "Crop Size (pixels)",
+            min_value=64,
+            max_value=1024,
+            value=256,
+            step=32,
+            help="Select the size of the square crop region"
+        )
+        
+        crop_region = st.selectbox(
+            "Crop Region",
+            options=[
+                "center",
+                "top-center",
+                "top-left",
+                "top-right",
+                "bottom-center",
+                "bottom-left",
+                "bottom-right",
+                "center-left",
+                "center-right"
+            ],
+            value="center",
+            help="Select which part of the image to crop"
+        )
+        
+        st.divider()
         st.header("ℹ️ About")
         st.info("""
         This tool processes images by:
-        1. Cropping to **256×256** pixels (top-center)
-        2. Converting to **grayscale** (black & white)
-        3. Exporting as **image** and **CSV matrix**
+        1. **Cropping** to your selected size and region
+        2. **Converting** to grayscale (black & white)
+        3. **Exporting** as image and CSV matrix
         """)
     
     # Main content
@@ -79,14 +113,18 @@ def main():
     if uploaded_file is not None:
         try:
             with st.spinner("Processing image..."):
-                grayscale_img, matrix = process_uploaded_file(uploaded_file)
+                grayscale_img, matrix = process_uploaded_file(
+                    uploaded_file, 
+                    crop_size=crop_size, 
+                    crop_region=crop_region
+                )
             
             # Display results
             col1, col2 = st.columns(2)
             
             with col1:
                 st.subheader("🖼️ Processed Image")
-                st.image(grayscale_img, use_column_width=True, caption="Grayscale 256×256")
+                st.image(grayscale_img, use_column_width=True, caption=f"Grayscale {grayscale_img.size[0]}×{grayscale_img.size[1]}")
             
             with col2:
                 st.subheader("📊 Matrix Info")
