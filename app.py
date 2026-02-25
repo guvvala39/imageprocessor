@@ -8,7 +8,7 @@ import numpy as np
 from src.image_processor import process_image
 
 
-def process_uploaded_file(uploaded_file, crop_size=256, crop_region="center"):
+def process_uploaded_file(uploaded_file, crop_size=256, crop_region="center", apply_crop=False):
     """Process the uploaded image file with specified crop settings."""
     # Save temporary file
     temp_path = "/tmp/temp_image.jpg"
@@ -21,7 +21,8 @@ def process_uploaded_file(uploaded_file, crop_size=256, crop_region="center"):
         temp_path, 
         output_path, 
         crop_size=crop_size, 
-        crop_region=crop_region
+        crop_region=crop_region,
+        apply_crop=apply_crop
     )
     
     return grayscale_img, matrix
@@ -61,33 +62,43 @@ def main():
     
     # Sidebar - Cropping settings
     with st.sidebar:
-        st.header("⚙️ Crop Settings")
+        st.header("⚙️ Processing Settings")
         
-        crop_size = st.slider(
-            "Crop Size (pixels)",
-            min_value=64,
-            max_value=1024,
-            value=256,
-            step=32,
-            help="Select the size of the square crop region"
+        apply_crop = st.checkbox(
+            "Apply Cropping",
+            value=False,
+            help="Enable to crop image, disable to process as-is"
         )
         
-        crop_region = st.selectbox(
-            "Crop Region",
-            options=[
-                "center",
-                "top-center",
-                "top-left",
-                "top-right",
-                "bottom-center",
-                "bottom-left",
-                "bottom-right",
-                "center-left",
-                "center-right"
-            ],
-            value="center",
-            help="Select which part of the image to crop"
-        )
+        if apply_crop:
+            crop_size = st.slider(
+                "Crop Size (pixels)",
+                min_value=64,
+                max_value=1024,
+                value=256,
+                step=32,
+                help="Select the size of the square crop region"
+            )
+            
+            crop_region = st.selectbox(
+                "Crop Region",
+                options=[
+                    "center",
+                    "top-center",
+                    "top-left",
+                    "top-right",
+                    "bottom-center",
+                    "bottom-left",
+                    "bottom-right",
+                    "center-left",
+                    "center-right"
+                ],
+                index=0,
+                help="Select which part of the image to crop"
+            )
+        else:
+            crop_size = 256
+            crop_region = "center"
         
         st.divider()
         st.header("ℹ️ About")
@@ -116,7 +127,8 @@ def main():
                 grayscale_img, matrix = process_uploaded_file(
                     uploaded_file, 
                     crop_size=crop_size, 
-                    crop_region=crop_region
+                    crop_region=crop_region,
+                    apply_crop=apply_crop
                 )
             
             # Display results
@@ -124,7 +136,7 @@ def main():
             
             with col1:
                 st.subheader("🖼️ Processed Image")
-                st.image(grayscale_img, use_column_width=True, caption=f"Grayscale {grayscale_img.size[0]}×{grayscale_img.size[1]}")
+                st.image(grayscale_img, caption=f"Grayscale {grayscale_img.size[0]}×{grayscale_img.size[1]}")
             
             with col2:
                 st.subheader("📊 Matrix Info")
@@ -137,7 +149,7 @@ def main():
                     st.metric("Max Value", int(matrix.max()))
                 
                 st.write("**Sample (first 10×10 values):**")
-                st.dataframe(matrix[:10, :10], use_container_width=True)
+                st.dataframe(matrix[:10, :10])
             
             # Download section
             st.divider()
@@ -155,8 +167,7 @@ def main():
                     label="📥 Download Image (JPG)",
                     data=img_byte_arr,
                     file_name="output_grayscale.jpg",
-                    mime="image/jpeg",
-                    use_container_width=True
+                    mime="image/jpeg"
                 )
             
             with col_csv:
@@ -167,8 +178,7 @@ def main():
                     label="📥 Download Matrix (CSV)",
                     data=csv_data,
                     file_name="grayscale_matrix.csv",
-                    mime="text/csv",
-                    use_container_width=True
+                    mime="text/csv"
                 )
             
             # Success message

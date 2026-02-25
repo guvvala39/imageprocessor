@@ -63,9 +63,11 @@ dist\imageprocessor-windows\imageprocessor.exe image.jpg
 
 ### Web UI Features
 - **Upload Image** - Click or drag JPEG/PNG
-- **View Preview** - See 256×256 grayscale result
+- **Cropping Control** - Toggle cropping on/off
+- **Crop Settings** - Select size (64-1024px) and region (9 positions)
+- **View Preview** - See grayscale result
 - **Check Data** - Matrix info and sample values
-- **Download** - JPG image + CSV matrix with one click
+- **Download** - Grayscale image + CSV matrix with one click
 
 ### CLI Options
 
@@ -73,18 +75,32 @@ dist\imageprocessor-windows\imageprocessor.exe image.jpg
 imageprocessor image.jpg [options]
 
 Options:
-  -o, --output FILE    Save processed image as FILE (default: output_grayscale.jpg)
-  -c, --csv FILE       Save matrix as CSV FILE (default: grayscale_matrix.csv)
-  -h, --help           Show help
+  -o, --output FILE      Save processed image as FILE (default: output_grayscale.jpg)
+  -c, --csv FILE         Save matrix as CSV FILE (default: grayscale_matrix.csv)
+  -s, --size PIXELS      Crop size in pixels (default: 256, no crop by default)
+  -r, --region REGION    Crop region (default: center)
+                         Options: center, top-center, top-left, top-right,
+                                 bottom-center, bottom-left, bottom-right,
+                                 center-left, center-right
+  -h, --help             Show help
 ```
 
 **Examples:**
 ```bash
-# Basic
+# Process without cropping (default)
 imageprocessor photo.jpg
 
-# Custom names
+# Crop 256x256 from center
+imageprocessor photo.jpg -s 256 -r center
+
+# Crop 512x512 from top-center
+imageprocessor photo.jpg -s 512 -r top-center
+
+# Custom output names
 imageprocessor photo.jpg -o result.jpg -c data.csv
+
+# All options combined
+imageprocessor photo.jpg -o result.jpg -c data.csv -s 256 -r top-left
 
 # Show help
 imageprocessor --help

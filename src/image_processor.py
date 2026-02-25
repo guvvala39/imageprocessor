@@ -105,21 +105,25 @@ def image_to_matrix(image):
     return np.array(image, dtype=np.uint8)
 
 
-def process_image(image_path, output_path=None, crop_size=256, crop_region="center"):
+def process_image(image_path, output_path=None, crop_size=256, crop_region="center", apply_crop=False):
     """
-    Main function to process image: crop and convert to grayscale.
+    Main function to process image: crop (optional) and convert to grayscale.
     
     Args:
         image_path (str): Path to input image
         output_path (str, optional): Path to save processed image
         crop_size (int): Size of the crop region (default: 256)
         crop_region (str): Region to crop from (default: 'center')
+        apply_crop (bool): Whether to apply cropping (default: True)
         
     Returns:
         tuple: (grayscale_image, grayscale_matrix)
     """
-    # Crop with specified parameters
-    cropped = crop_image(image_path, crop_size=crop_size, crop_region=crop_region)
+    # Crop with specified parameters if enabled
+    if apply_crop:
+        cropped = crop_image(image_path, crop_size=crop_size, crop_region=crop_region)
+    else:
+        cropped = Image.open(image_path)
     
     # Convert to grayscale
     grayscale_img = to_grayscale(cropped)

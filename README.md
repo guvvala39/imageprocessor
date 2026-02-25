@@ -1,6 +1,6 @@
 # 📷 Image Processor
 
-A beginner-friendly Python tool that crops images to 256×256 pixels and converts them to grayscale, then exports the data as a matrix (CSV and binary formats).
+A beginner-friendly Python tool that converts images to grayscale and optionally crops them, then exports the data as a matrix (CSV and binary formats).
 
 **🌐 Try it now:** [Live Web App](https://yourusername.github.io/imageprocessor/)
 
@@ -14,8 +14,8 @@ A beginner-friendly Python tool that crops images to 256×256 pixels and convert
 ## 🎯 What Does This Project Do?
 
 This tool takes an image file and:
-1. **Crops** it to the top-center 256×256 pixel region
-2. **Converts** it to grayscale (black & white)
+1. **Converts** it to grayscale (black & white)
+2. **Optionally crops** it to any size and region (9 crop positions available)
 3. **Exports** the data as:
    - A grayscale image (JPG)
    - A CSV file (human-readable spreadsheet)
@@ -180,10 +180,24 @@ Save the matrix with a specific CSV name:
 python process_image.py "image.jpg" -c my_data.csv
 ```
 
-### Using Both Custom Names
+Enable cropping with custom size and region:
 
 ```bash
-python process_image.py "image.jpg" -o result.jpg -c data.csv
+python process_image.py "image.jpg" -s 512 -r top-center
+```
+
+### Available Crop Regions
+
+```
+center (default)    top-center      top-left
+top-right           bottom-center   bottom-left
+bottom-right        center-left     center-right
+```
+
+### Using Multiple Options
+
+```bash
+python process_image.py "image.jpg" -o result.jpg -c data.csv -s 256 -r center
 ```
 
 ### View Available Options
